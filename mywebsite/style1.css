@@ -1,0 +1,269 @@
+/* Import Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+/* Reset and Basic Styling */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.3s ease-in-out;
+}
+
+body {
+    background: #f4f4f4;
+    color: #333;
+}
+
+/* Header Styles */
+header {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+header h1 {
+    font-size: 2.5em;
+    font-weight: 600;
+}
+
+header nav ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    margin-top: 10px;
+}
+
+header nav ul li {
+    display: inline;
+}
+
+header nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 1.2em;
+    padding: 10px 15px;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+header nav ul li a:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Search Section */
+.search-section {
+    text-align: center;
+    margin: 30px 0;
+}
+
+.search-section input {
+    padding: 12px 15px;
+    font-size: 1.2em;
+    width: 60%;
+    border-radius: 25px;
+    border: 1px solid #ccc;
+    outline: none;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+#search-button {
+    padding: 12px 20px;
+    background: #007bff;
+    color: white;
+    font-size: 1.2em;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+}
+
+#search-button:hover {
+    background: #0056b3;
+}
+
+/* Categories Section */
+.categories-section {
+    text-align: center;
+    margin-top: 40px;
+}
+
+.categories-section h2 {
+    font-size: 2em;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.category-btn {
+    padding: 12px 24px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-size: 1.2em;
+    cursor: pointer;
+    margin: 10px;
+    transition: transform 0.3s ease-in-out, background 0.3s;
+}
+
+.category-btn:hover {
+    background: #0056b3;
+    transform: scale(1.1);
+}
+
+/* Featured Items Section */
+.featured-items {
+    margin-top: 50px;
+}
+
+.featured-items h2 {
+    font-size: 2em;
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.auction-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.auction-item {
+    background: white;
+    width: 270px;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s;
+    cursor: pointer;
+}
+
+.auction-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.auction-item img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.auction-item h3 {
+    font-size: 1.6em;
+    margin-top: 12px;
+}
+
+.auction-item p {
+    font-size: 1.1em;
+    color: #777;
+    margin-bottom: 10px;
+}
+
+.auction-item .price {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #007bff;
+    margin-bottom: 15px;
+}
+
+.auction-item button {
+    padding: 10px 20px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: transform 0.3s, background 0.3s;
+}
+
+.auction-item button:hover {
+    background: #0056b3;
+    transform: scale(1.1);
+}
+
+/* Pagination Styling */
+#pagination-controls {
+    text-align: center;
+    margin-top: 40px;
+}
+
+#pagination-controls a,
+#pagination-controls span {
+    text-decoration: none;
+    color: white;
+    background: #007bff;
+    padding: 12px 20px;
+    margin: 0 5px;
+    border-radius: 8px;
+    font-size: 1.2em;
+    cursor: pointer;
+}
+
+#pagination-controls a:hover {
+    background: #0056b3;
+}
+
+#pagination-controls span {
+    background: #0056b3;
+    cursor: default;
+}
+
+/* Footer Section */
+footer {
+    background: #333;
+    color: white;
+    padding: 25px;
+    text-align: center;
+    margin-top: 50px;
+    font-size: 1.2em;
+}
+
+/* Scroll Animation */
+.auction-item {
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeInUp 0.5s ease-in-out forwards;
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .auction-list {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .auction-item {
+        width: 90%;
+    }
+
+    .search-section input {
+        width: 85%;
+    }
+
+    .category-btn {
+        width: 85%;
+    }
+}

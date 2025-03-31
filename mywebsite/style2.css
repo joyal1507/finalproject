@@ -1,0 +1,150 @@
+/* Import Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+/* Reset and Global Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background: url('https://png.pngtree.com/back_origin_pic/04/48/50/84cd2a9fbc6cbd5522b2f048a56703a8.jpg') no-repeat center center fixed;
+    background-size: cover;
+    color: #333;
+    line-height: 1.8;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ✅ Header Container with Logout Button at the Top Right */
+.header-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.95);
+    z-index: 999;
+    border-bottom: 1px solid #ccc;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* ✅ Logout Button Styling */
+.logout-btn {
+    padding: 10px 25px;
+    background-color: #ff4d4d;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+    font-size: 16px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.logout-btn:hover {
+    background-color: #e63939;
+    transform: scale(1.05);  /* ✅ Slight zoom effect on hover */
+}
+
+/* Main Section */
+h1 {
+    font-size: 2rem;
+    margin-bottom: 30px;
+    margin-top: 90px; /* Adjusted margin to prevent overlap with the header */
+}
+
+/* Buttons */
+button {
+    width: 300px;
+    height: 80px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: 0.3s;
+    background-size: 30px;
+    background-repeat: no-repeat;
+    background-position: left 15px center;
+    padding-left: 20px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Buy Button */
+button:first-of-type {
+    background-color: #007bff;
+    color: white;
+    background-image: url('buy-icon.png'); /* Replace with your buy image */
+}
+
+button:first-of-type:hover {
+    background-color: #0056b3;
+    transform: scale(1.05); /* ✅ Slight zoom effect on hover */
+}
+
+/* Sell Button */
+button:last-of-type {
+    background-color: #28a745;
+    color: white;
+    background-image: url('sell-icon.png'); /* Replace with your sell image */
+}
+
+button:last-of-type:hover {
+    background-color: #1e7e34;
+    transform: scale(1.05); /* ✅ Slight zoom effect on hover */
+}
+
+/* Button Container */
+a {
+    text-decoration: none;
+    margin: 10px;
+}
+
+/* Footer Styling */
+footer {
+    text-align: center;
+    width: 100%;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    font-size: 14px;
+}
+
+/* ✅ Responsive Design */
+@media (max-width: 768px) {
+    .header-container {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 15px;
+    }
+
+    .logout-btn {
+        width: 100%;
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    button {
+        width: 100%;
+        font-size: 1rem;
+        height: 60px;
+    }
+}

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account</title>
+    <link rel="stylesheet" href="stylemax.css"> <!-- Optional: Link to CSS file -->
+</head>
+<body>
+    <header>
+        <h1>Create an Account</h1>
+    </header>
+    <main>
+        <form id="create-account-form" action="/create-account" method="POST">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="form-group">
+                <label for="confirm-password">Confirm Password:</label>
+                <input type="password" id="confirm-password" name="confirm-password" required>
+            </div>
+            <button type="submit">Create Account</button>
+        </form>
+    </main>
+    <footer>
+        <p>&copy; 2025 My Website</p>
+    </footer>
+
+    <script>
+        document.getElementById('create-account-form').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevent default form submission
+    
+            const username = document.getElementById("username").value;
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const confirmPassword = document.getElementById("confirm-password").value;
+    
+            // ✅ Ensure passwords match
+            if (password !== confirmPassword) {
+                alert("❌ Passwords do not match!");
+                return;
+            }
+    
+            try {
+                const response = await fetch("http://localhost:4000/api/auth/register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, email, password }),
+                });
+    
+                const data = await response.json();
+                console.log("📤 Server Response:", data);
+    
+                if (data.success) {
+                    alert("✅ Account created successfully! Redirecting to login...");
+                    window.location.href = "login.html";
+                } else {
+                    alert("❌ " + data.message);
+                }
+            } catch (error) {
+                console.error("❌ Registration Error:", error);
+                alert("Something went wrong. Please try again.");
+            }
+        });
+    </script>
+    
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sell an Item</title>
+    <link rel="stylesheet" href="stylemax.css">
+</head>
+<body>
+    <header>
+        <h1>Sell an Item</h1>
+    </header>
+    <main>
+        <form id="sell-form" enctype="multipart/form-data">
+            <label for="title">Item Title:</label>
+            <input type="text" id="title" name="title" required>
+
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" required></textarea>
+
+            <label for="startingBid">Starting Bid ($):</label>
+            <input type="number" id="startingBid" name="startingBid" min="1" required>
+
+            <label for="buyNowPrice">Buy Now Price ($):</label>
+            <input type="number" id="buyNowPrice" name="buyNowPrice" placeholder="Optional" min="1">
+
+            <label for="auctionHours">Auction Duration (Hours):</label>
+            <input type="number" id="auctionHours" name="auctionHours" min="0" value="1" required>
+
+            <label for="auctionMinutes">Auction Duration (Minutes):</label>
+            <input type="number" id="auctionMinutes" name="auctionMinutes" min="0" value="0" required>
+
+            <label for="image">Upload Image:</label>
+            <input type="file" id="image" name="image" accept="image/*" required>
+
+            <button type="submit">List Item</button>
+        </form>
+
+        <div id="message" style="margin-top: 20px; color: green;"></div>
+    </main>
+    <footer>
+        <p>&copy; 2025 Auctionista</p>
+    </footer>
+
+    <script>
+        document.getElementById('sell-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            // ✅ Fetch the logged-in user ID from sessionStorage
+            const sellerId = sessionStorage.getItem("userId");
+
+            if (!sellerId || sellerId.length !== 24) {
+                alert("❌ Invalid or missing user ID. Please log in again.");
+                window.location.href = "login.html";
+                return;
+            }
+
+            const title = document.getElementById("title").value.trim();
+            const description = document.getElementById("description").value.trim();
+            const startingBid = parseFloat(document.getElementById("startingBid").value);
+            const buyNowPrice = parseFloat(document.getElementById("buyNowPrice").value) || null;
+            const hours = parseInt(document.getElementById("auctionHours").value) || 0;
+            const minutes = parseInt(document.getElementById("auctionMinutes").value) || 0;
+
+            // ✅ Validate input values
+            if (!title || !description || isNaN(startingBid) || startingBid <= 0) {
+                alert("❌ Please fill in all required fields correctly.");
+                return;
+            }
+
+            if (buyNowPrice && buyNowPrice <= startingBid) {
+                alert("❌ Buy Now price must be higher than the starting bid.");
+                return;
+            }
+
+            const auctionDuration = (hours * 60 + minutes) * 60000;
+            const expirationTime = new Date(Date.now() + auctionDuration).toISOString();
+
+            const formData = new FormData();
+            formData.append("productName", title);
+            formData.append("features", description);
+            formData.append("price", startingBid);
+            formData.append("expirationTime", expirationTime);
+            formData.append("userId", sellerId);
+
+            if (buyNowPrice) {
+                formData.append("buyNowPrice", buyNowPrice);
+            }
+
+            // ✅ Validate and append image
+            const imageInput = document.getElementById("image");
+            if (imageInput.files.length > 0) {
+                formData.append("image", imageInput.files[0]);
+            } else {
+                alert("❌ Please upload an image.");
+                return;
+            }
+
+            // ✅ Confirmation prompt before listing
+            const confirmListing = confirm(`Are you sure you want to list "${title}" with a starting bid of $${startingBid}?`);
+            if (!confirmListing) {
+                return;
+            }
+
+            try {
+                const response = await fetch("http://localhost:4000/api/items/create", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                const messageDiv = document.getElementById("message");
+                if (data.success) {
+                    messageDiv.textContent = "✅ Item listed successfully!";
+                    messageDiv.style.color = "green";
+
+                    // ✅ Clear the form after successful submission
+                    document.getElementById('sell-form').reset();
+
+                    // ✅ Optionally redirect after delay
+                    setTimeout(() => window.location.href = "choice.html", 3000);
+
+                } else {
+                    messageDiv.textContent = `❌ ${data.message}`;
+                    messageDiv.style.color = "red";
+                }
+
+            } catch (error) {
+                console.error("❌ Error:", error);
+                alert("❌ Something went wrong. Please try again.");
+            }
+        });
+    </script>
+</body>
+</html>

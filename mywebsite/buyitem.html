@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy Items</title>
+    <link rel="stylesheet" href="stylemax.css">
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Available Auctions</h1>
+    </header>
+    <main>
+        <div id="itemsList" class="item-grid"></div>
+    </main>
+    <footer>
+        <p>&copy; 2025 Auctionista</p>
+    </footer>
+
+    <script>
+    const socket = io("http://localhost:4000");
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        console.log("📌 User ID from sessionStorage:", sessionStorage.getItem("userId"));
+        await loadItems();
+    });
+
+    // ✅ Function to load auction items
+    async function loadItems() {
+        try {
+            const response = await fetch("http://localhost:4000/api/items");
+            
+            if (!response.ok) throw new Error('Failed to load items');
+
+            const items = await response.json();
+            const itemsList = document.getElementById("itemsList");
+            itemsList.innerHTML = "";
+
+            for (const item of items) {
+                const itemResponse = await fetch(`http://localhost:4000/api/items/${item._id}`);
+                if (!itemResponse.ok) continue;
+
+                const freshItem = await itemResponse.json();
+
+                const itemCard = document.createElement("div");
+                itemCard.classList.add("item-card");
+                itemCard.setAttribute("id", `item-${freshItem._id}`);
+
+                // ✅ Display image if available
+                let imageHtml = freshItem.imagesArray?.length 
+                    ? `<img src="http://localhost:4000${freshItem.imagesArray[0]}" 
+                             alt="Item Image" 
+                             class="item-img">`
+                    : `<p>No image available</p>`;
+
+                let highestBidderName = freshItem.highestBidder ? freshItem.highestBidder.username : "No bids yet";
+                let buyerName = freshItem.buyer ? freshItem.buyer.username : "Not bought yet";
+
+                let buyNowButton = freshItem.buyNowPrice && !freshItem.isExpired
+                    ? `<button onclick="buyNow(event, '${freshItem._id}', '${freshItem.buyNowPrice}')">Buy Now for $${freshItem.buyNowPrice}</button>`
+                    : "";
+
+                let bidSection = freshItem.isExpired
+                    ? `<p class="expired">Auction Ended</p>`
+                    : `
+                        <input type="number" id="bid-input-${freshItem._id}" placeholder="Enter your bid">
+                        <button onclick="placeBid('${freshItem._id}')">Place Bid</button>
+                        ${buyNowButton}
+                      `;
+
+                itemCard.innerHTML = `
+                    ${imageHtml}
+                    <h3>${freshItem.productName}</h3>
+                    <p>${freshItem.features}</p>
+                    <p>Current Bid: $<span id="bid-${freshItem._id}">${freshItem.bidPrice}</span></p>
+                    <p>Highest Bidder: <span id="bidder-${freshItem._id}">${highestBidderName}</span></p>
+                    <p>Buyer: <span id="buyer-${freshItem._id}">${buyerName}</span></p>
+                    <p>Time Left: <span id="timer-${freshItem._id}">Calculating...</span></p>
+                    ${bidSection}
+                `;
+
+                itemsList.appendChild(itemCard);
+
+                if (!freshItem.isExpired) {
+                    startCountdown(freshItem._id, freshItem.expirationTime);
+                }
+            }
+
+        } catch (error) {
+            console.error("❌ Error fetching items:", error);
+        }
+    }
+
+    // 📡 Real-time bid updates
+    socket.on("bidUpdate", async (data) => {
+        console.log("🔄 Bid update received:", data);
+
+        try {
+            const response = await fetch(`http://localhost:4000/api/items/${data.itemId}`);
+            if (!response.ok) return;
+
+            const updatedItem = await response.json();
+
+            document.getElementById(`bid-${data.itemId}`).textContent = updatedItem.bidPrice;
+            document.getElementById(`bidder-${data.itemId}`).textContent = updatedItem.highestBidder 
+                ? updatedItem.highestBidder.username 
+                : "No bids yet";
+
+            console.log(`✅ Updated Highest Bidder: ${updatedItem.highestBidder?.username}`);
+        } catch (error) {
+            console.error("❌ Error fetching updated item data:", error);
+        }
+    });
+
+    // 📡 Handle auction expiration
+    socket.on("auctionExpired", async (data) => {
+        console.log("⏳ Auction expired:", data);
+        const itemCard = document.getElementById(`item-${data.itemId}`);
+
+        if (itemCard) {
+            try {
+                const response = await fetch(`http://localhost:4000/api/items/${data.itemId}`);
+                if (!response.ok) return;
+
+                const updatedItem = await response.json();
+                let buyerName = updatedItem.buyer ? updatedItem.buyer.username : "No buyer";
+
+                itemCard.innerHTML = `
+                    <p class="expired">${data.winnerMessage}</p>
+                    <p>Buyer: <strong>${buyerName}</strong></p>
+                `;
+                setTimeout(() => itemCard.remove(), 5000);
+            } catch (error) {
+                console.error("❌ Error fetching updated auction data:", error);
+            }
+        }
+    });
+
+    // ✅ Countdown Timer
+    function startCountdown(itemId, expirationTime) {
+        function updateTimer() {
+            const timerElement = document.getElementById(`timer-${itemId}`);
+
+            if (!timerElement) {
+                console.warn(`⚠️ Timer element missing for item ${itemId}`);
+                clearInterval(timerInterval);
+                return;  
+            }
+
+            const now = new Date().getTime();
+            const timeLeft = new Date(expirationTime).getTime() - now;
+
+            if (timeLeft <= 0) {
+                timerElement.textContent = "Auction Ended";
+                clearInterval(timerInterval);
+            } else {
+                const minutes = Math.floor(timeLeft / 60000);
+                const seconds = Math.floor((timeLeft % 60000) / 1000);
+                timerElement.textContent = `${minutes}m ${seconds}s`;
+            }
+        }
+
+        const timerInterval = setInterval(updateTimer, 1000);
+        updateTimer();
+    }
+
+    // ✅ Place Bid
+    async function placeBid(itemId) {
+        const bidInput = document.getElementById(`bid-input-${itemId}`).value.trim();
+        const userId = sessionStorage.getItem("userId");
+
+        if (!userId) {
+            alert("❌ Invalid session. Please log in again.");
+            return;
+        }
+
+        if (!bidInput || isNaN(bidInput) || bidInput <= 0) {
+            alert("❌ Enter a valid bid amount.");
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://localhost:4000/api/items/${itemId}/bid`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ bidAmount: parseFloat(bidInput), userId })
+            });
+
+            const data = await response.json();
+            alert(data.success ? "✅ Bid placed successfully!" : `❌ ${data.message}`);
+            await loadItems();
+        } catch (error) {
+            console.error("❌ Error placing bid:", error);
+        }
+    }
+
+    // ✅ Buy Now with Confirmation
+    async function buyNow(event, itemId, buyNowPrice) {
+        event.preventDefault();
+        const userId = sessionStorage.getItem("userId");
+
+        if (!userId) {
+            alert("❌ Invalid session. Please log in again.");
+            return;
+        }
+
+        const confirmPurchase = confirm(`Are you sure you want to buy this item for $${buyNowPrice}?`);
+        if (!confirmPurchase) return;
+
+        try {
+            await fetch(`http://localhost:4000/api/items/${itemId}/buy`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId })
+            });
+            await loadItems();
+        } catch (error) {
+            console.error("❌ Error:", error);
+        }
+    }
+    </script>
+</body>
+</html>

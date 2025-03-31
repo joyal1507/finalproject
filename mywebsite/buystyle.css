@@ -1,0 +1,120 @@
+/* Import Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap');
+
+/* Global Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background: url('https://png.pngtree.com/back_origin_pic/04/48/50/84cd2a9fbc6cbd5522b2f048a56703a8.jpg') no-repeat center center fixed;
+    background-size: cover;  /* Ensures the image covers the entire page */
+    color: #333;
+    line-height: 1.8;
+    padding: 20px;
+    text-align: center;
+}
+
+/* Header */
+h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.7);
+    display: inline-block;
+    padding: 15px 30px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.15);
+    animation: fadeInDown 1s ease-in-out;
+}
+
+/* Items List */
+#itemsList {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    padding-top: 20px;
+}
+
+/* Individual Item Styling */
+.item-card {
+    background: white;
+    width: 300px;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease-in-out;
+    text-align: left;
+    animation: fadeInUp 1s ease-in-out;
+}
+
+.item-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Item Title */
+.item-card h3 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #007bff;
+}
+
+/* Item Image */
+.item-card img {
+    width: 100%;
+    border-radius: 8px;
+    margin-top: 10px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.item-card img:hover {
+    transform: scale(1.1);
+}
+
+/* Time Remaining Styling */
+.time-remaining {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #dc3545;
+    display: flex;
+    justify-content: space-between;  /* Ensures text remains in one line */
+    white-space: nowrap; /* Prevents text from breaking into multiple lines */
+    margin-top: 10px;
+}
+
+/* Animations */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #itemsList {
+        flex-direction: column;
+        align-items: center;
+    }
+}

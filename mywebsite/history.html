@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auction History</title>
+    <link rel="stylesheet" href="stylemax.css">
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Auction History</h1>
+        <a href="choice.html">Back to Menu</a>
+        <p id="user-info"></p>
+    </header>
+
+    <main>
+        <table id="historyTable" border="1">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Final Bid Price</th>
+                    <th>Winner</th>
+                    <th>Seller</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Auctionista</p>
+    </footer>
+
+    <script>
+        // ✅ Display logged-in user info
+        document.addEventListener("DOMContentLoaded", async () => {
+            const username = sessionStorage.getItem("username");
+            const userInfo = document.getElementById("user-info");
+
+            if (username) {
+                userInfo.textContent = `Logged in as: ${username}`;
+            } else {
+                userInfo.textContent = "Not logged in";
+            }
+
+            // ✅ Connect to Socket.IO server
+            const socket = io("http://localhost:4000");
+
+            // ✅ Listen for real-time updates
+            socket.on("updateHistory", (data) => {
+                console.log("🔄 Real-time history update received:", data);
+                loadHistory();  // Refresh history on updates
+            });
+
+            await loadHistory();
+        });
+
+        // ✅ Fetch auction history from backend
+        async function loadHistory() {
+            try {
+                const response = await fetch("http://localhost:4000/api/history");
+                const data = await response.json();
+
+                if (data.success) {
+                    displayHistory(data.history);
+                } else {
+                    alert("Failed to fetch history.");
+                }
+            } catch (error) {
+                console.error("❌ Error fetching history:", error);
+            }
+        }
+
+        // ✅ Display auction history with improved seller info handling
+        function displayHistory(history) {
+            const tableBody = document.querySelector("#historyTable tbody");
+            tableBody.innerHTML = "";
+
+            history.forEach(item => {
+                const row = document.createElement("tr");
+
+                // ✅ Null-check for buyer and seller
+                const buyerInfo = item.buyer 
+                    ? `${item.buyer.username} (${item.buyer.email})`
+                    : "No winner";
+
+                const sellerInfo = item.seller
+                    ? `${item.seller.username} (${item.seller.email})`
+                    : "Unknown Seller";
+
+                row.innerHTML = `
+                    <td>${item.productName}</td>
+                    <td>$${item.bidPrice}</td>
+                    <td><strong>Buyer:</strong> ${buyerInfo}</td>
+                    <td><strong>Seller:</strong> ${sellerInfo}</td>
+                    <td>${item.isExpired ? "Expired" : "Active"}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+    </script>
+</body>
+</html>

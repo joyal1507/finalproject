@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Action</title>
+    <link rel="stylesheet" href="stylemax.css">
+</head>
+<body>
+    <header>
+        <h1>Welcome to Auctionista</h1>
+        <p id="user-info"></p>
+        <button onclick="logout()">LOGOUT</button>
+    </header>
+
+    <main>
+        <h2>What would you like to do?</h2>
+        <div class="btn-container">
+            <a href="sellitem.html"><button>SELL AN ITEM</button></a>
+            <a href="buyitem.html"><button>BUY AN ITEM</button></a>
+
+            <!-- ✅ History Button -->
+            <a href="history.html"><button>View Auction History</button></a>
+
+            <!-- ✅ Dashboard Button -->
+            
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Auctionista</p>
+    </footer>
+
+    <script>
+        // ✅ Display the currently logged-in user info properly using `sessionStorage`
+        document.addEventListener("DOMContentLoaded", () => {
+            const userId = sessionStorage.getItem("userId");
+            const username = sessionStorage.getItem("username");
+
+            const userInfo = document.getElementById("user-info");
+
+            // ✅ Display username only if both userId and username exist
+            if (userId && username) {
+                userInfo.textContent = `Logged in as: ${username}`;
+            } else {
+                userInfo.textContent = "Not logged in";
+            }
+        });
+
+        // ✅ Logout function
+        function logout() {
+            sessionStorage.clear();  // ✅ Clear sessionStorage for isolated session management
+            window.location.href = "login.html";
+        }
+    </script>
+</body>
+</html>

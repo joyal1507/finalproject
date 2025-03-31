@@ -1,0 +1,254 @@
+/* =======================
+   General Styles
+======================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Open Sans', sans-serif;  /* Sleek, modern font */
+}
+
+body {
+    line-height: 1.8;
+    color: #2d2d2d;                         
+    background: url('image/UntitledMadewithFlexClip-ezgif.com-optimize.gif') no-repeat center center/cover; 
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    animation: fadeIn 2s ease-in-out;        /* Smooth fade-in effect */
+}
+
+/* =======================
+   Header & Footer
+======================= */
+header, footer {
+    color: #ffffff;
+    text-align: center;
+    padding: 50px 20px;
+    font-size: 28px;
+    letter-spacing: 1.5px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    
+    /* Make header and footer transparent to show the GIF */
+    background: transparent;
+    backdrop-filter: blur(5px);  /* Optional: Blur effect over the GIF */
+}
+
+/* Footer styling */
+footer {
+    font-size: 18px;
+    margin-top: auto;
+}
+
+/* =======================
+   Main Content
+======================= */
+main {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 40px;
+
+    /* Remove the white background to show the GIF */
+    background: transparent;
+    box-shadow: none;
+    border-radius: 12px;
+    transition: transform 0.4s, box-shadow 0.4s;
+}
+
+/* Hover effect */
+main:hover {
+    transform: scale(1.02);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+/* =======================
+   Buttons
+======================= */
+button, .btn {
+    display: inline-block;
+    background: #0077b6;
+    color: #fff;
+    padding: 15px 35px;
+    margin: 15px;
+    font-size: 18px;
+    border: none;
+    border-radius: 8px;
+    transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+button:hover, .btn:hover {
+    background: #005f91;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* =======================
+   Links
+======================= */
+a {
+    text-decoration: none;
+    color: #0077b6;
+    font-size: 18px;
+    transition: color 0.3s, text-shadow 0.3s;
+}
+
+a:hover {
+    color: #005f91;
+    text-shadow: 0 0 8px #0077b6;
+}
+
+/* =======================
+   Form Styling
+======================= */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+form label {
+    font-weight: bold;
+    font-size: 18px;
+    color: #ffffff; /* White text for better readability */
+}
+
+form input, form textarea, form select {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    transition: box-shadow 0.3s, border 0.3s;
+    background: rgba(0, 0, 0, 0.6);  /* Darker background to contrast with GIF */
+    color: #fff;
+}
+
+form input:focus, form textarea:focus {
+    box-shadow: 0 0 12px #0077b6;
+    border: 1px solid #0077b6;
+    outline: none;
+}
+
+/* =======================
+   Item Cards
+======================= */
+.item-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin: 30px;
+}
+
+.item-card {
+    background: rgba(0, 0, 0, 0.6); /* Semi-transparent cards over GIF */
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    transition: transform 0.4s, box-shadow 0.4s;
+    text-align: center;
+    max-width: 300px;
+    margin: auto;
+    color: #fff;  /* White text for contrast */
+}
+
+.item-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+
+.item-card img {
+    max-width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+/* =======================
+   Auction History Table
+======================= */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 30px;
+    font-size: 18px;
+    background: rgba(0, 0, 0, 0.7); /* Dark background over GIF */
+    color: #fff;
+}
+
+table th, table td {
+    padding: 18px;
+    border: 1px solid #ccc;
+    text-align: left;
+}
+
+table th {
+    background: #0077b6;
+    color: #fff;
+    font-weight: bold;
+}
+
+table tr:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* =======================
+   Footer Links
+======================= */
+footer a {
+    color: #0077b6;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+footer a:hover {
+    color: #005f91;
+}
+
+/* =======================
+   Responsive Design
+======================= */
+@media (max-width: 1024px) {
+    main {
+        padding: 30px;
+    }
+
+    button, .btn {
+        width: 100%;
+        font-size: 16px;
+        text-align: center;
+    }
+
+    form input, form textarea {
+        font-size: 16px;
+    }
+
+    table th, table td {
+        padding: 14px;
+    }
+}
+
+@media (max-width: 768px) {
+    header, footer {
+        padding: 30px 15px;
+        font-size: 22px;
+    }
+
+    main {
+        padding: 20px;
+    }
+
+    .item-card {
+        max-width: 100%;
+        padding: 20px;
+    }
+
+    table th, table td {
+        padding: 12px;
+        font-size: 14px;
+    }
+}
