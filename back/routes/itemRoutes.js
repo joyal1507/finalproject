@@ -32,26 +32,32 @@ const upload = multer({ storage });
 
 // ✅ Middleware to Validate `userId` in Requests
 const validateUser = async (req, res, next) => {
-    const { userId } = req.body;
+    try {
+        const { userId } = req.body;
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ success: false, message: "Invalid user ID" });
+        }
 
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-        return res.status(400).json({ success: false, message: "Invalid user ID" });
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        req.user = user; // Attach user info to request
+        next();
+    } catch (error) {
+        console.error("❌ User validation error:", error);
+        res.status(500).json({ success: false, message: "Server error" });
     }
-
-    const user = await User.findById(userId);
-    if (!user) {
-        return res.status(400).json({ success: false, message: "User not found" });
-    }
-
-    req.user = user; // Attach user info to request
-    next();
 };
 
 // ✅ Get all auction items
 router.get("/", async (req, res) => {
     try {
-        const items = await Item.find().populate("highestBidder buyer seller", "username");
-        res.json(items);
+        const items = await Item.find()
+            .populate("highestBidder buyer seller", "username email");
+
+        res.status(200).json(items);
     } catch (error) {
         console.error("❌ Error fetching items:", error);
         res.status(500).json({ message: "Server error" });
@@ -61,26 +67,33 @@ router.get("/", async (req, res) => {
 // ✅ Get a single auction item by ID
 router.get("/:id", async (req, res) => {
     try {
-        const item = await Item.findById(req.params.id).populate("highestBidder buyer seller", "username");
+        const item = await Item.findById(req.params.id)
+            .populate("highestBidder buyer seller", "username email");
+
         if (!item) {
             return res.status(404).json({ success: false, message: "Item not found" });
         }
-        res.json(item);
+
+        res.status(200).json(item);
     } catch (error) {
         console.error("❌ Error fetching item:", error);
         res.status(500).json({ success: false, message: "Server error" });
     }
 });
 
-// ✅ Create a new auction item with the correct seller assignment
+// ✅ Create a new auction item
 router.post("/create", upload.single("image"), validateUser, async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
         console.log("📥 Incoming Data:", req.body);
 
         const { productName, features, price, buyNowPrice, expirationTime } = req.body;
-        const sellerId = req.user._id;  // ✅ Use the authenticated seller ID
+        const sellerId = req.user._id;  // ✅ Assign authenticated seller
 
         if (!productName || !features || !price || !expirationTime) {
+            await session.abortTransaction();
             return res.status(400).json({ success: false, message: "Missing required fields" });
         }
 
@@ -93,39 +106,43 @@ router.post("/create", upload.single("image"), validateUser, async (req, res) =>
             bidPrice: price,
             buyNowPrice: buyNowPrice || null,
             expirationTime: new Date(expirationTime),
-            seller: sellerId,  // ✅ Assign the correct seller
+            seller: sellerId,
             highestBidder: null,
             buyer: null,
             imagesArray: imagePath ? [imagePath] : [],
             isExpired: false
         });
 
-        await newItem.save();
+        await newItem.save({ session });
 
+        await session.commitTransaction();
+        session.endSession();
+
+        // ✅ WebSocket notification
         if (io) {
             io.emit("updateHistory", {
                 message: `🛒 New item added: ${newItem.productName} by ${req.user.username}`
             });
         }
 
-        res.json({ success: true, item: newItem });
+        res.status(201).json({ success: true, item: newItem });
 
     } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
         console.error("❌ Error creating item:", error);
         res.status(500).json({ success: false, message: "Server error" });
     }
 });
 
-// ✅ Place a bid with the correct bidder assignment
+// ✅ Place a bid
 router.post("/:id/bid", validateUser, async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
 
     try {
         const { bidAmount } = req.body;
-        const bidderId = req.user._id;  // ✅ Use the authenticated bidder ID
-
-        console.log(`🔍 Bid request: Bidder ID: ${bidderId}, Amount: ${bidAmount}`);
+        const bidderId = req.user._id;
 
         let item = await Item.findById(req.params.id).session(session);
         if (!item || item.isExpired) {
@@ -138,22 +155,20 @@ router.post("/:id/bid", validateUser, async (req, res) => {
             return res.status(400).json({ success: false, message: "Bid must be higher than current bid" });
         }
 
-        await Item.updateOne(
-            { _id: item._id, bidPrice: { $lt: bidAmount } },
-            { highestBidder: bidderId, bidPrice: bidAmount },
-            { session }
-        );
+        item.highestBidder = bidderId;
+        item.bidPrice = bidAmount;
+
+        await item.save({ session });
 
         await session.commitTransaction();
         session.endSession();
 
-        item = await Item.findById(req.params.id).populate("highestBidder", "username");
-
+        // ✅ Emit bid update
         if (io) {
             io.emit("bidUpdate", {
                 itemId: item._id,
                 newBid: item.bidPrice,
-                highestBidder: item.highestBidder.username
+                highestBidder: req.user.username
             });
 
             io.emit("updateHistory", {
@@ -161,7 +176,7 @@ router.post("/:id/bid", validateUser, async (req, res) => {
             });
         }
 
-        res.json({ success: true, message: "Bid placed successfully", updatedItem: item });
+        res.status(200).json({ success: true, message: "Bid placed successfully", updatedItem: item });
 
     } catch (error) {
         await session.abortTransaction();
@@ -171,35 +186,45 @@ router.post("/:id/bid", validateUser, async (req, res) => {
     }
 });
 
-// ✅ "Buy Now" with correct buyer assignment
+// ✅ "Buy Now" feature
 router.post("/:id/buy", validateUser, async (req, res) => {
-    try {
-        const buyerId = req.user._id;  // ✅ Use authenticated buyer ID
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-        let item = await Item.findById(req.params.id);
+    try {
+        const buyerId = req.user._id;
+
+        let item = await Item.findById(req.params.id).session(session);
         if (!item || item.isExpired) {
+            await session.abortTransaction();
             return res.status(400).json({ success: false, message: "Invalid or expired auction" });
         }
 
         if (!item.buyNowPrice) {
+            await session.abortTransaction();
             return res.status(400).json({ success: false, message: "Buy Now not available" });
         }
 
-        const updatedItem = await Item.findByIdAndUpdate(
-            req.params.id,
-            { isExpired: true, buyer: buyerId },
-            { new: true }
-        ).populate("buyer seller", "username");
+        item.isExpired = true;
+        item.buyer = buyerId;
 
+        await item.save({ session });
+
+        await session.commitTransaction();
+        session.endSession();
+
+        // ✅ Emit buy event
         if (io) {
             io.emit("updateHistory", {
-                message: `🎉 Item "${updatedItem.productName}" bought by ${updatedItem.buyer.username}`
+                message: `🎉 Item "${item.productName}" bought by ${req.user.username}`
             });
         }
 
-        res.json({ success: true, message: "Item purchased successfully!", updatedItem });
+        res.status(200).json({ success: true, message: "Item purchased successfully!", updatedItem: item });
 
     } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
         console.error("❌ Error in Buy Now:", error);
         res.status(500).json({ success: false, message: "Server error" });
     }
